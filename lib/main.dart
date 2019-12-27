@@ -2,25 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'data.dart';
 
 void main() {
   runApp(MaterialApp(
-    title: 'Named Routes Demo',
+    title: 'Home',
     // Start the app with the "/" named route. In this case, the app starts
     // on the FirstScreen widget.
     initialRoute: '/',
     routes: {
       // When navigating to the "/" route, build the FirstScreen widget.
-      '/': (context) => FirstScreen(),
+      '/': (context) => HomeScreen(),
       // When navigating to the "/second" route, build the SecondScreen widget.
-      '/second': (context) => SecondScreen(),
+      '/game/new': (context) => NewGameScreen(),
     },
   ));
 }
 
-class FirstScreen extends StatelessWidget {
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +33,7 @@ class FirstScreen extends StatelessWidget {
           child: Text('Launch screen'),
           onPressed: () {
             // Navigate to the second screen using a named route.
-            Navigator.pushNamed(context, '/second');
+            Navigator.pushNamed(context, '/game/new');
           },
         ),
       ),
@@ -40,7 +41,35 @@ class FirstScreen extends StatelessWidget {
   }
 }
 
-class SecondScreen extends StatelessWidget {
+class NewGameScreen extends StatefulWidget {
+  @override
+  NewGameState createState() {
+    return NewGameState();
+  }
+}
+
+class NewGameState extends State<NewGameScreen> {
+  File _image;
+
+//https://pub.dev/packages/image_picker#-readme-tab-
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  ImageProvider _loadImage() {
+    if(_image == null) {
+        return AssetImage('assets/nophoto.png');
+    } else {
+        return FileImage(_image);
+    }
+    
+
+}
+
   var data;
   bool autoValidate = true;
   bool readOnly = false;
@@ -63,6 +92,29 @@ class SecondScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
+              // Row(
+              //   children: <Widget>[
+              //     Expanded(
+              //       child: _image == null
+              //           ? Text('No image selected.')
+              //           : Image.file(_image),
+
+              //     ),
+              //     SizedBox(
+              //       width: 20,
+              //     ),
+              //     Expanded(
+              //       child: MaterialButton(
+              //         color: Theme.of(context).accentColor,
+              //         child: Text(
+              //           "Load photo",
+              //           style: TextStyle(color: Colors.white),
+              //         ),
+              //         onPressed: getImage,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               FormBuilder(
                 // context,
                 key: _fbKey,
@@ -73,6 +125,76 @@ class SecondScreen extends StatelessWidget {
                 // readOnly: true,
                 child: Column(
                   children: <Widget>[
+                    // Row(
+                    //   children: <Widget>[
+                    //     Expanded(
+                    //       child: _image == null
+                    //           ? Text('No image selected.')
+                    //           : Image.file(_image),
+                    //     ),
+                    //     SizedBox(
+                    //       width: 20,
+                    //     ),
+                    //     Expanded(
+                    //       child: MaterialButton(
+                    //         color: Theme.of(context).accentColor,
+                    //         child: Text(
+                    //           "Load photo",
+                    //           style: TextStyle(color: Colors.white),
+                    //         ),
+                    //         onPressed: getImage,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    FormBuilderCustomField(
+                      attribute: "image",
+                      validators: [
+                        //FormBuilderValidators.required(),
+                      ],
+                      formField: FormField(
+                        enabled: true,
+                        builder: (FormFieldState<String> field) {
+                          return InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: "Select option",
+                              contentPadding:
+                                  EdgeInsets.only(top: 10.0, bottom: 0.0),
+                              border: InputBorder.none,
+                              errorText: field.errorText,
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Image(
+                                    image: _loadImage(),      
+                                  ),
+                                ),
+                                // Expanded(
+                                //   child: _image == null
+                                //       ? Text('No image selected.')
+                                //       : Image.file(_image),
+                                // ),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Expanded(
+                                  child: MaterialButton(
+                                    color: Theme.of(context).accentColor,
+                                    child: Text(
+                                      "Load photo",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    onPressed: getImage,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            
+                          );
+                        },
+                      ),
+                    ),
                     FormBuilderCustomField(
                       attribute: "name",
                       validators: [
@@ -294,7 +416,7 @@ class SecondScreen extends StatelessWidget {
                         }
                       },
                     ),
-                    /*FormBuilderTypeAhead(
+                    FormBuilderTypeAhead(
                       decoration: InputDecoration(
                         labelText: "Contact Person",
                       ),
@@ -365,14 +487,13 @@ class SecondScreen extends StatelessWidget {
                       attribute: "accept_terms_switch",
                       initialValue: true,
                       onChanged: _onChanged,
-                    ),*/
+                    ),
                     FormBuilderStepper(
                       decoration: InputDecoration(labelText: "Stepper"),
                       attribute: "stepper",
                       initialValue: 10,
                       step: 1,
                     ),
-                    /*
                     FormBuilderRate(
                       decoration: InputDecoration(labelText: "Rate this form"),
                       attribute: "rate",
@@ -459,7 +580,7 @@ class SecondScreen extends StatelessWidget {
                       // height: 250,
                       clearButtonText: "Start Over",
                       onChanged: _onChanged,
-                    ),*/
+                    ),
                   ],
                 ),
               ),
